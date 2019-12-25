@@ -1,0 +1,72 @@
+---
+- name: Install dependencies
+  package:
+    name: "{{ item }}"
+    state: present
+  register: _install_dep_package
+  until: _install_dep_package is success
+  retries: 5
+  delay: 2
+  with_items: "{{ es_exporter_dependencies }}"
+
+- name: Create the elasticsearch group
+  group:
+    name: "{{ es_exporter_system_group }}"
+    state: present
+    system: true
+  when: es_exporter_system_group != "root"
+
+- name: Create the elasticsearch user
+  user:
+    name: "{{ es_exporter_system_user }}"
+    groups: "{{ es_exporter_system_group }}"
+    append: true
+    shell: /usr/bin/nologin
+    system: true
+    create_home: false
+    home: /
+  when: es_exporter_system_user != "root"
+
+- block:
+    - name: Download elasticsearch_exporter binary to local folder
+      become: false
+      get_url:
+        url: "https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v{{ es_exporter_version }}/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        dest: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        checksum: "sha256:{{ es_exporter_checksum }}"
+      register: _download_binary
+      until: _download_binary is success
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Unpack elasticsearch_exporter binary
+      become: false
+      unarchive:
+        src: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        dest: "/tmp"
+        creates: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Propagate elasticsearch_exporter binaries
+      copy:
+        src: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
+        dest: "/usr/local/bin/elasticsearch_exporter"
+        mode: 0755
+        owner: root
+        group: root
+      notify: restart elasticsearch_exporter
+      when: not ansible_check_mode
+  when: es_exporter_binary_local_dir | length == 0
+
+- name: propagate locally distributed elasticsearch_exporter binary
+  copy:
+    src: "{{ es_exporter_binary_local_dir }}/elasticsearch_exporter"
+    dest: "/usr/local/bin/elasticsearch_exporter"
+    mode: 0755
+    owner: root
+    group: root
+  when: es_exporter_binary_local_dir | length > 0
+  notify: restart elasticsearch_exporter
