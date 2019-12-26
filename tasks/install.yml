@@ -31,7 +31,7 @@
     - name: Download elasticsearch_exporter binary to local folder
       become: false
       get_url:
-        url: "https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v{{ es_exporter_version }}/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        url: "https://github.com/justwatchcom/elasticsearch_exporter/releases/download/v{{ es_exporter_version }}/elasticsearch_exporter-{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
         dest: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
         checksum: "sha256:{{ es_exporter_checksum }}"
       register: _download_binary
@@ -44,15 +44,15 @@
     - name: Unpack elasticsearch_exporter binary
       become: false
       unarchive:
-        src: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
+        src: "/tmp/elasticsearch_exporter-{{ es_exporter_version }}.linux-{{ go_arch }}.tar.gz"
         dest: "/tmp"
-        creates: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
+        creates: "/tmp/elasticsearch_exporter-{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
       delegate_to: localhost
       check_mode: false
 
     - name: Propagate elasticsearch_exporter binaries
       copy:
-        src: "/tmp/elasticsearch_exporter-v{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
+        src: "/tmp/elasticsearch_exporter-{{ es_exporter_version }}.linux-{{ go_arch }}/elasticsearch_exporter"
         dest: "/usr/local/bin/elasticsearch_exporter"
         mode: 0755
         owner: root
