@@ -10,11 +10,12 @@ Type=simple
 User={{ es_exporter_system_user }}
 Group={{ es_exporter_system_group }}
 ExecStart=/usr/local/bin/elasticsearch_exporter \
+    --es.uri={{ es_exporter_es_url }} \
 {% if es_exporter_custom_option | length > 0 %}
     {{ es_exporter_custom_option }} \
 {% endif %}
-    -web.listen-address {{ es_exporter_web_listen_address }} \
-    -web.telemetry-path {{ es_exporter_web_telemetry_path }}
+    --web.listen-address={{ es_exporter_web_listen_address }} \
+    --web.telemetry-path={{ es_exporter_web_telemetry_path }}
 
 SyslogIdentifier=elasticsearch_exporter
 Restart=always
