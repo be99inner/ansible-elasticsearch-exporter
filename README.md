@@ -1,15 +1,12 @@
-Role Name
-=========
+# Elasticsearch Exporter
 
 Ansible role for provision Elasticsearch Exporter
 
-Requirements
-------------
+## Requirements
 
 ansible version >= 2.9
 
-Role Variables
---------------
+## Role Variables
 
 ```yaml
 es_exporter_version: 1.1.0
@@ -24,26 +21,22 @@ es_exporter_custom_option: ""
 es_exporter_binary_local_dir: ""
 ```
 
-Dependencies
-------------
+## Dependencies
 
 None
 
-Example Playbook
-----------------
+## Example Playbook
 
 ```yaml
 - hosts: servers
   roles:
-      - be99inner.elasticsearch-exporter
+    - be99inner.elasticsearch-exporter
 ```
 
-License
--------
+## License
 
 MIT
 
-Author Information
-------------------
+## Author Information
 
 Anurak Janawan
